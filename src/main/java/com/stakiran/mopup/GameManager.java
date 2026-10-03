@@ -85,7 +85,7 @@ public class GameManager {
         clearTicksRemaining = -1;
         targetSeen = false;
 
-        HudManager.show(server);
+        HudManager.hide(); // Bars are (re)created on the next tick
 
         server.getPlayerManager().broadcast(
             Text.literal("§a§l[Mopup] ゲーム開始！ 地上 (y>=" + Y_THRESHOLD + ") の敵モブをすべて掃討せよ！"), false);
