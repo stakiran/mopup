@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// lightgame100 のキットからエリトラとロケット花火を除いたもの
+// lightgame100 のキットのエリトラとロケット花火を松明に置き換えたもの
 public class KitManager {
 
     public static void giveKit(ServerPlayerEntity player) {
@@ -36,13 +36,15 @@ public class KitManager {
         contents.set(7, new ItemStack(Items.WATER_BUCKET));
         contents.set(8, new ItemStack(Items.COOKED_BEEF, 64));
 
-        // Row 2: 盾, 鉄レギンス, 鉄ブーツ, 鉄ヘルメット, 鉄チェストプレート, 盾, (空), (空), 松明
+        // Row 2: 盾, 鉄レギンス, 鉄ブーツ, 鉄ヘルメット, 鉄チェストプレート, 盾, 松明, 松明, 松明
         contents.set(9, new ItemStack(Items.SHIELD));
         contents.set(10, new ItemStack(Items.IRON_LEGGINGS));
         contents.set(11, new ItemStack(Items.IRON_BOOTS));
         contents.set(12, new ItemStack(Items.IRON_HELMET));
         contents.set(13, new ItemStack(Items.IRON_CHESTPLATE));
         contents.set(14, new ItemStack(Items.SHIELD));
+        contents.set(15, new ItemStack(Items.TORCH, 64));
+        contents.set(16, new ItemStack(Items.TORCH, 64));
         contents.set(17, new ItemStack(Items.TORCH, 64));
 
         // Row 3: 松明 x5スタック
