@@ -17,7 +17,14 @@ public class SpawnScanner {
     // (skyLight > random(32)) more often. Result: ~1/4 spawn chance compared to caves.
     private static final int OUTDOOR_SKY_LIGHT = 12;
 
-    public record Result(int outdoor, int indoor) {}
+    // Indoor positions spawn ~4x more often than outdoor ones
+    private static final int INDOOR_WEIGHT = 4;
+
+    public record Result(int outdoor, int indoor) {
+        public int scale() {
+            return (outdoor + indoor * INDOOR_WEIGHT) / 100;
+        }
+    }
 
     public static Result scan(ServerWorld world, int minY) {
         WorldBorder border = world.getWorldBorder();

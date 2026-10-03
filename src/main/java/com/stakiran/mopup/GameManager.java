@@ -48,6 +48,9 @@ public class GameManager {
 
     private static int gameTicks;
 
+    // Game scale measured at setup (see SpawnScanner.Result.scale)
+    private static int scale;
+
     // Y threshold for "surface"
     private static final int Y_THRESHOLD = 64;
 
@@ -92,10 +95,11 @@ public class GameManager {
         server.getPlayerManager().broadcast(
             Text.literal("§a§l[Mopup] ゲーム開始！ 地上 (y>=" + Y_THRESHOLD + ") の敵モブをすべて掃討せよ！"), false);
 
-        SpawnScanner.Result scale = SpawnScanner.scan(gameWorld, Y_THRESHOLD);
+        SpawnScanner.Result scan = SpawnScanner.scan(gameWorld, Y_THRESHOLD);
+        scale = scan.scale();
         server.getPlayerManager().broadcast(
-            Text.literal(String.format("§e[Mopup] 規模: 屋外 %,d マス / 屋内・洞窟 %,d マス",
-                scale.outdoor(), scale.indoor())), false);
+            Text.literal(String.format("§e[Mopup] 規模: %d （屋外 %,d マス / 屋内・洞窟 %,d マス）",
+                scale, scan.outdoor(), scan.indoor())), false);
     }
 
     // ========== TARGETS ==========
@@ -120,9 +124,9 @@ public class GameManager {
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.changeGameMode(GameMode.SPECTATOR);
         }
-        HudManager.showTitle(server, "§6§l掃討完了！", "§fクリアタイム " + time);
+        HudManager.showTitle(server, "§6§l掃討完了！", "§fクリアタイム " + time + " §7(規模 " + scale + ")");
         server.getPlayerManager().broadcast(
-            Text.literal("§6§l[Mopup] 掃討完了！ クリアタイム: " + time), false);
+            Text.literal("§6§l[Mopup] 掃討完了！ クリアタイム: " + time + " （規模: " + scale + "）"), false);
     }
 
     // ========== GAME OVER ==========
@@ -138,9 +142,9 @@ public class GameManager {
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.changeGameMode(GameMode.SPECTATOR);
         }
-        HudManager.showTitle(server, "§c§lゲームオーバー", "§f経過時間 " + time);
+        HudManager.showTitle(server, "§c§lゲームオーバー", "§f経過時間 " + time + " §7(規模 " + scale + ")");
         server.getPlayerManager().broadcast(
-            Text.literal("§c§l[Mopup] " + deadPlayer.getName().getString() + " が死亡！ ゲームオーバー（経過時間: " + time + "）"), false);
+            Text.literal("§c§l[Mopup] " + deadPlayer.getName().getString() + " が死亡！ ゲームオーバー（経過時間: " + time + "、規模: " + scale + "）"), false);
     }
 
     // ========== TICK EVENT ==========
@@ -205,7 +209,7 @@ public class GameManager {
         int glowSecondsLeft = glowing
             ? ceilSeconds(GLOW_DURATION_TICKS - cyclePos)
             : ceilSeconds(GLOW_CYCLE_TICKS - cyclePos);
-        HudManager.update(server, targetCount, targetSeen, clearTicksRemaining, CLEAR_TICKS, glowing, glowSecondsLeft);
+        HudManager.update(server, targetCount, targetSeen, clearTicksRemaining, CLEAR_TICKS, glowing, glowSecondsLeft, scale);
 
         gameTicks++;
 

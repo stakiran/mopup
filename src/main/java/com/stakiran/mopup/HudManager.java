@@ -28,7 +28,7 @@ public class HudManager {
     }
 
     public static void update(MinecraftServer server, int targetCount, boolean targetSeen,
-            int clearTicksRemaining, int clearTicks, boolean glowing, int glowSecondsLeft) {
+            int clearTicksRemaining, int clearTicks, boolean glowing, int glowSecondsLeft, int scale) {
         String mobText;
         BossBar.Color color;
         float percent;
@@ -62,7 +62,7 @@ public class HudManager {
 
             int y = player.getBlockPos().getY();
             // setName/setColor/setPercent only send packets when the value changes
-            bar.setName(Text.literal(mobText + " §8| §fY: §b" + y + " §8| " + glowText));
+            bar.setName(Text.literal(mobText + " §8| §fY: §b" + y + " §8| " + glowText + " §8| §7規模 " + scale));
             bar.setColor(color);
             bar.setPercent(percent);
         }
