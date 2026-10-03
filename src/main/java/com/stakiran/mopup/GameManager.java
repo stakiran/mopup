@@ -14,6 +14,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.border.WorldBorder;
+import net.minecraft.world.rule.GameRules;
 
 import java.util.List;
 
@@ -45,6 +46,9 @@ public class GameManager {
     // Y threshold for "surface"
     private static final int Y_THRESHOLD = 64;
 
+    private static final int BORDER_SIZE = 100;
+    private static final long MIDNIGHT = 18000;
+
     // ========== SETUP ==========
 
     // Can be called at any time (also works as a reset)
@@ -55,12 +59,19 @@ public class GameManager {
         MinecraftServer server = source.getServer();
         gameWorld = player.getEntityWorld();
 
-        // Run as the player so that "~ ~" is the player's position
-        ServerCommandSource playerSource = player.getCommandSource(gameWorld).withSilent();
-        runCommand(server, playerSource, "worldborder center ~ ~");
-        runCommand(server, playerSource, "worldborder set 100");
-        runCommand(server, playerSource, "gamerule advance_time false");
-        runCommand(server, playerSource, "time set midnight");
+        // Equivalent to the following commands. Done via API because commands dispatched
+        // from inside another command (/mopup) are queued and never run.
+        //   /worldborder center ~ ~
+        //   /worldborder set 100
+        //   /gamerule advance_time false
+        //   /time set midnight
+        WorldBorder border = gameWorld.getWorldBorder();
+        border.setCenter(player.getX(), player.getZ());
+        border.setSize(BORDER_SIZE);
+        gameWorld.getGameRules().setValue(GameRules.ADVANCE_TIME, false, server);
+        for (ServerWorld world : server.getWorlds()) {
+            world.setTimeOfDay(MIDNIGHT);
+        }
 
         for (ServerPlayerEntity p : server.getPlayerManager().getPlayerList()) {
             p.changeGameMode(GameMode.SURVIVAL);
@@ -74,10 +85,6 @@ public class GameManager {
 
         server.getPlayerManager().broadcast(
             Text.literal("§a§l[Mopup] ゲーム開始！ 地上 (y>=" + Y_THRESHOLD + ") の敵モブをすべて掃討せよ！"), false);
-    }
-
-    private static void runCommand(MinecraftServer server, ServerCommandSource source, String command) {
-        server.getCommandManager().parseAndExecute(source, command);
     }
 
     // ========== TARGETS ==========
