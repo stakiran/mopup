@@ -20,7 +20,8 @@ public class SpawnScanner {
     // Indoor positions spawn ~4x more often than outdoor ones
     private static final int INDOOR_WEIGHT = 4;
 
-    public record Result(int outdoor, int indoor) {
+    // maxSurfaceY: highest WORLD_SURFACE top (feet Y when standing on the highest block) inside the border
+    public record Result(int outdoor, int indoor, int maxSurfaceY) {
         public int scale() {
             return (outdoor + indoor * INDOOR_WEIGHT) / 100;
         }
@@ -35,6 +36,7 @@ public class SpawnScanner {
 
         int outdoor = 0;
         int indoor = 0;
+        int maxSurfaceY = minY;
         BlockPos.Mutable pos = new BlockPos.Mutable();
         BlockPos.Mutable below = new BlockPos.Mutable();
         BlockPos.Mutable above = new BlockPos.Mutable();
@@ -43,6 +45,7 @@ public class SpawnScanner {
             for (int z = minZ; z < maxZ; z++) {
                 // Nothing to spawn on above the highest non-air block
                 int topY = world.getTopY(Heightmap.Type.WORLD_SURFACE, x, z);
+                maxSurfaceY = Math.max(maxSurfaceY, topY);
                 for (int y = minY; y <= topY; y++) {
                     pos.set(x, y, z);
                     if (!isSpawnable(world, pos, below, above)) continue;
@@ -55,7 +58,7 @@ public class SpawnScanner {
                 }
             }
         }
-        return new Result(outdoor, indoor);
+        return new Result(outdoor, indoor, maxSurfaceY);
     }
 
     // Same conditions as a zombie (2 blocks tall) spawning, except light from the sky

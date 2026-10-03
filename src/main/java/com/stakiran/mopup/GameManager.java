@@ -53,6 +53,12 @@ public class GameManager {
 
     // Y threshold for "surface"
     private static final int Y_THRESHOLD = 64;
+    // Going below this Y is game over (prevents hiding deep underground until the surface clears)
+    private static final int Y_GAME_OVER = 60;
+    // Going above (highest ground at setup + margin) is also game over: from high up,
+    // mobs despawn and stop spawning, so the surface would clear by itself
+    private static final int CEILING_MARGIN = 3;
+    private static int ceilingY;
 
     private static final int BORDER_SIZE = 100;
     private static final long MIDNIGHT = 18000;
@@ -100,11 +106,12 @@ public class GameManager {
 
         HudManager.hide(); // Bars are (re)created on the next tick
 
-        server.getPlayerManager().broadcast(
-            Text.literal("§a§l[Mopup] ゲーム開始！ 地上 (y>=" + Y_THRESHOLD + ") の敵モブをすべて掃討せよ！"), false);
-
         SpawnScanner.Result scan = SpawnScanner.scan(gameWorld, Y_THRESHOLD);
         scale = scan.scale();
+        ceilingY = scan.maxSurfaceY() + CEILING_MARGIN;
+
+        server.getPlayerManager().broadcast(
+            Text.literal("§a§l[Mopup] ゲーム開始！ 地上 (y>=" + Y_THRESHOLD + ") の敵モブをすべて掃討せよ！ y" + Y_GAME_OVER + "〜" + ceilingY + " の外に出るとゲームオーバー"), false);
         server.getPlayerManager().broadcast(
             Text.literal(String.format("§e[Mopup] 規模: %d （屋外 %,d マス / 屋内・洞窟 %,d マス）",
                 scale, scan.outdoor(), scan.indoor())), false);
@@ -139,7 +146,7 @@ public class GameManager {
 
     // ========== GAME OVER ==========
 
-    private static void gameOver(MinecraftServer server, ServerPlayerEntity deadPlayer) {
+    private static void gameOver(MinecraftServer server, String reason) {
         currentPhase = Phase.LOST;
         HudManager.hide();
 
@@ -152,7 +159,7 @@ public class GameManager {
         }
         HudManager.showTitle(server, "§c§lゲームオーバー", "§f経過時間 " + time + " §7(規模 " + scale + ")");
         server.getPlayerManager().broadcast(
-            Text.literal("§c§l[Mopup] " + deadPlayer.getName().getString() + " が死亡！ ゲームオーバー（経過時間: " + time + "、規模: " + scale + "）"), false);
+            Text.literal("§c§l[Mopup] " + reason + " ゲームオーバー（経過時間: " + time + "、規模: " + scale + "）"), false);
     }
 
     // ========== TICK EVENT ==========
@@ -172,13 +179,26 @@ public class GameManager {
 
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) -> {
             if (currentPhase == Phase.GAME && entity instanceof ServerPlayerEntity player) {
-                gameOver(player.getEntityWorld().getServer(), player);
+                gameOver(player.getEntityWorld().getServer(), player.getName().getString() + " が死亡！");
             }
         });
     }
 
     private static void onTick(MinecraftServer server) {
         if (currentPhase != Phase.GAME) return;
+
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            if (!player.isAlive()) continue;
+            int y = player.getBlockPos().getY();
+            if (y < Y_GAME_OVER) {
+                gameOver(server, player.getName().getString() + " が y<" + Y_GAME_OVER + " に潜った！");
+                return;
+            }
+            if (y > ceilingY) {
+                gameOver(server, player.getName().getString() + " が y>" + ceilingY + " に登った！");
+                return;
+            }
+        }
 
         // Counted every tick so the display and countdown stay real-time
         List<Entity> targets = findTargets();
@@ -217,7 +237,8 @@ public class GameManager {
         int glowSecondsLeft = glowing
             ? ceilSeconds(GLOW_DURATION_TICKS - cyclePos)
             : ceilSeconds(GLOW_CYCLE_TICKS - cyclePos);
-        HudManager.update(server, targetCount, targetSeen, clearTicksRemaining, CLEAR_TICKS, glowing, glowSecondsLeft, scale);
+        HudManager.update(server, targetCount, targetSeen, clearTicksRemaining, CLEAR_TICKS, glowing, glowSecondsLeft, scale,
+            Y_GAME_OVER, ceilingY);
 
         gameTicks++;
 

@@ -17,6 +17,8 @@ import java.util.UUID;
 public class HudManager {
 
     private static final int TICKS_PER_SECOND = 20;
+    // Y turns red when this close to the allowed range edge (60-63 = below the surface threshold)
+    private static final int Y_WARNING = 4;
 
     private static final Map<UUID, ServerBossBar> bossBars = new HashMap<>();
 
@@ -28,7 +30,8 @@ public class HudManager {
     }
 
     public static void update(MinecraftServer server, int targetCount, boolean targetSeen,
-            int clearTicksRemaining, int clearTicks, boolean glowing, int glowSecondsLeft, int scale) {
+            int clearTicksRemaining, int clearTicks, boolean glowing, int glowSecondsLeft, int scale,
+            int minY, int maxY) {
         String mobText;
         BossBar.Color color;
         float percent;
@@ -61,8 +64,11 @@ public class HudManager {
             }
 
             int y = player.getBlockPos().getY();
+            // Show the allowed Y range next to Y; turn red within Y_WARNING of either edge
+            String yColor = (y < minY + Y_WARNING || y > maxY - Y_WARNING) ? "§c" : "§b";
+            String yText = "§fY: " + yColor + y + " §7(" + minY + "〜" + maxY + ")";
             // setName/setColor/setPercent only send packets when the value changes
-            bar.setName(Text.literal(mobText + " §8| §fY: §b" + y + " §8| " + glowText + " §8| §7規模 " + scale));
+            bar.setName(Text.literal(mobText + " §8| " + yText + " §8| " + glowText + " §8| §7規模 " + scale));
             bar.setColor(color);
             bar.setPercent(percent);
         }
