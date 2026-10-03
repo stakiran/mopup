@@ -36,6 +36,9 @@ public class GameManager {
     private static final int CLEAR_TICKS = CLEAR_SECONDS * TICKS_PER_SECOND;
     // -1 = countdown not running
     private static int clearTicksRemaining = -1;
+    // Countdown starts only after at least one target has been seen,
+    // so the game is not won instantly before any mob spawns
+    private static boolean targetSeen;
 
     // Glow: 10 seconds every minute
     private static final int GLOW_CYCLE_TICKS = 60 * TICKS_PER_SECOND;
@@ -80,6 +83,7 @@ public class GameManager {
         currentPhase = Phase.GAME;
         gameTicks = 0;
         clearTicksRemaining = -1;
+        targetSeen = false;
 
         HudManager.show(server);
 
@@ -122,6 +126,7 @@ public class GameManager {
         gameWorld = null;
         gameTicks = 0;
         clearTicksRemaining = -1;
+        targetSeen = false;
     }
 
     public static void registerEvents() {
@@ -136,10 +141,10 @@ public class GameManager {
         List<Entity> targets = findTargets();
         int targetCount = targets.size();
 
-        // Glow window: first 10 seconds of every minute.
+        // Glow window: first 10 seconds of every minute, starting from 1:00 (no glow right after start).
         // Re-applied every second so that newly spawned mobs also glow.
         int cyclePos = gameTicks % GLOW_CYCLE_TICKS;
-        boolean glowing = cyclePos < GLOW_DURATION_TICKS;
+        boolean glowing = gameTicks >= GLOW_CYCLE_TICKS && cyclePos < GLOW_DURATION_TICKS;
         if (glowing && cyclePos % TICKS_PER_SECOND == 0) {
             int remaining = GLOW_DURATION_TICKS - cyclePos;
             for (Entity e : targets) {
@@ -150,7 +155,10 @@ public class GameManager {
         }
 
         // Clear countdown
-        if (targetCount == 0) {
+        if (targetCount > 0 && !targetSeen) {
+            targetSeen = true;
+        }
+        if (targetCount == 0 && targetSeen) {
             if (clearTicksRemaining < 0) {
                 clearTicksRemaining = CLEAR_TICKS;
                 server.getPlayerManager().broadcast(
@@ -166,7 +174,7 @@ public class GameManager {
         int glowSecondsLeft = glowing
             ? ceilSeconds(GLOW_DURATION_TICKS - cyclePos)
             : ceilSeconds(GLOW_CYCLE_TICKS - cyclePos);
-        HudManager.update(server, targetCount, clearTicksRemaining, CLEAR_TICKS, glowing, glowSecondsLeft);
+        HudManager.update(server, targetCount, targetSeen, clearTicksRemaining, CLEAR_TICKS, glowing, glowSecondsLeft);
 
         gameTicks++;
 

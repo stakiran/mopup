@@ -30,13 +30,17 @@ public class HudManager {
         bossBar.setVisible(false);
     }
 
-    public static void update(MinecraftServer server, int targetCount, int clearTicksRemaining, int clearTicks,
-            boolean glowing, int glowSecondsLeft) {
+    public static void update(MinecraftServer server, int targetCount, boolean targetSeen,
+            int clearTicksRemaining, int clearTicks, boolean glowing, int glowSecondsLeft) {
         if (clearTicksRemaining >= 0) {
             int secondsLeft = (clearTicksRemaining + TICKS_PER_SECOND - 1) / TICKS_PER_SECOND;
             bossBar.setName(Text.literal("§a地上の敵: 0 §f| 勝利まで " + secondsLeft + " 秒"));
             bossBar.setColor(BossBar.Color.GREEN);
             bossBar.setPercent((float) clearTicksRemaining / clearTicks);
+        } else if (!targetSeen) {
+            bossBar.setName(Text.literal("§c地上の敵: 0 §7(出現待ち)"));
+            bossBar.setColor(BossBar.Color.RED);
+            bossBar.setPercent(1.0f);
         } else {
             bossBar.setName(Text.literal("§c地上の敵: " + targetCount));
             bossBar.setColor(BossBar.Color.RED);
