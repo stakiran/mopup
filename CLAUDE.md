@@ -20,12 +20,13 @@ Yarn マッピングは 1.21.11 が最後のため、これ以上のバージョ
 
 ## アーキテクチャ
 
-`src/main/java/com/stakiran/mopup/` に6クラス:
+`src/main/java/com/stakiran/mopup/` に7クラス:
 
 - **MopupMod** — エントリポイント。コマンドとティックイベントを登録。
 - **MopupCommand** — `/mopup {item,setup}` のBrigadierコマンドツリー。
 - **GameManager** — コアゲームロジック。フェーズ（IDLE → GAME → WON / LOST）、setup時のコマンド実行、毎ティックのターゲットモブ集計、発光（1分毎に10秒）、30秒カウントダウン、勝利処理、死亡時のゲームオーバー処理。全状態はstaticフィールド。
 - **TargetMobs** — ターゲットモブの判定。
+- **SpawnScanner** — setup時に規模（ボーダー内・y>=64 で敵モブが湧ける場所の数）を屋外／屋内・洞窟に分けて数える。屋外は空の光12以上。
 - **HudManager** — プレイヤーごとのボスバーに敵数・カウントダウン・Y座標・発光タイミングをまとめて表示。
 - **KitManager** — 初期アイテム（lightgame100 のキットのエリトラとロケット花火を松明に置き換えたもの）。
 

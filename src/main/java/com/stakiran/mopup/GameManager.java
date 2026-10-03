@@ -91,6 +91,11 @@ public class GameManager {
 
         server.getPlayerManager().broadcast(
             Text.literal("§a§l[Mopup] ゲーム開始！ 地上 (y>=" + Y_THRESHOLD + ") の敵モブをすべて掃討せよ！"), false);
+
+        SpawnScanner.Result scale = SpawnScanner.scan(gameWorld, Y_THRESHOLD);
+        server.getPlayerManager().broadcast(
+            Text.literal(String.format("§e[Mopup] 規模: 屋外 %,d マス / 屋内・洞窟 %,d マス",
+                scale.outdoor(), scale.indoor())), false);
     }
 
     // ========== TARGETS ==========
