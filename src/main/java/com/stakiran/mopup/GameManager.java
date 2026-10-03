@@ -1,5 +1,6 @@
 package com.stakiran.mopup;
 
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.entity.Entity;
@@ -23,7 +24,8 @@ public class GameManager {
     public enum Phase {
         IDLE,   // No game running
         GAME,   // Mopping up
-        WON     // Cleared
+        WON,    // Cleared
+        LOST    // A player died
     }
 
     private static Phase currentPhase = Phase.IDLE;
@@ -118,6 +120,24 @@ public class GameManager {
             Text.literal("§6§l[Mopup] 掃討完了！ クリアタイム: " + time), false);
     }
 
+    // ========== GAME OVER ==========
+
+    private static void gameOver(MinecraftServer server, ServerPlayerEntity deadPlayer) {
+        currentPhase = Phase.LOST;
+        HudManager.hide();
+
+        int seconds = gameTicks / TICKS_PER_SECOND;
+        String time = String.format("%d:%02d", seconds / 60, seconds % 60);
+
+        // Dead player also respawns in spectator
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            player.changeGameMode(GameMode.SPECTATOR);
+        }
+        HudManager.showTitle(server, "§c§lゲームオーバー", "§f経過時間 " + time);
+        server.getPlayerManager().broadcast(
+            Text.literal("§c§l[Mopup] " + deadPlayer.getName().getString() + " が死亡！ ゲームオーバー（経過時間: " + time + "）"), false);
+    }
+
     // ========== TICK EVENT ==========
 
     public static void resetState() {
@@ -132,6 +152,12 @@ public class GameManager {
     public static void registerEvents() {
         ServerTickEvents.END_SERVER_TICK.register(GameManager::onTick);
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> resetState());
+
+        ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) -> {
+            if (currentPhase == Phase.GAME && entity instanceof ServerPlayerEntity player) {
+                gameOver(player.getEntityWorld().getServer(), player);
+            }
+        });
     }
 
     private static void onTick(MinecraftServer server) {
