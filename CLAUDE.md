@@ -4,7 +4,7 @@ Claude Code (claude.ai/code) がこのリポジトリで作業する際のガイ
 
 ## プロジェクト概要
 
-Minecraft Fabric MOD（1.21.11）。100ブロックのアンプリファイドワールドで、地上（y>=64）の敵モブを全滅させて30秒維持すれば勝ちのミニゲーム。Java 21で記述。[lightgame100](https://github.com/stakiran/lightgame100) の亜種。仕様は `CONTEXT.md`。
+Minecraft Fabric MOD（1.21.11）。100ブロックのワールドで、地上（y>=64）の敵モブを全滅させて30秒維持すれば勝ちのミニゲーム。Java 21で記述。[lightgame100](https://github.com/stakiran/lightgame100) の亜種。仕様は `CONTEXT.md`。
 
 Yarn マッピングは 1.21.11 が最後のため、これ以上のバージョンアップには Mojang マッピングへの移行が必要。
 
