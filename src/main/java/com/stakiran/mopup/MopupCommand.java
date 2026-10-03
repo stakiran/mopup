@@ -28,7 +28,7 @@ public class MopupCommand {
         }
 
         KitManager.giveKit(player);
-        source.sendFeedback(() -> Text.literal("§a[Mopup] 初期アイテムを付与しました！"), false);
+        source.sendFeedback(() -> Text.literal("§a[Mopup] 持ち物をクリアして初期アイテムを付与しました！"), false);
         return 1;
     }
 

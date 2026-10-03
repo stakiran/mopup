@@ -55,6 +55,8 @@ public class KitManager {
         ItemStack shulkerBox = new ItemStack(Items.SHULKER_BOX);
         shulkerBox.set(DataComponentTypes.CONTAINER, ContainerComponent.fromStacks(contents));
 
+        // Reset inventory to the starting state (makes retrying easy)
+        player.getInventory().clear();
         player.giveItemStack(shulkerBox);
     }
 
