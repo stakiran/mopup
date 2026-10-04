@@ -25,14 +25,13 @@ public class KitManager {
 
         List<ItemStack> contents = new ArrayList<>(Collections.nCopies(27, ItemStack.EMPTY));
 
-        // Row 1: ネザライトの剣, 松明, ネザライトのツルハシ, 丸石, ネザライトの斧, ネザライトのショベル, マグマバケツ, 水バケツ, 牛肉
+        // Row 1: ネザライトの剣, 松明, ネザライトのツルハシ, 丸石, ネザライトの斧, ネザライトのショベル, (空き), 水バケツ, 牛肉
         contents.set(0, new ItemStack(Items.NETHERITE_SWORD));
         contents.set(1, new ItemStack(Items.TORCH, 64));
         contents.set(2, createPickaxe(enchantmentRegistry));
         contents.set(3, new ItemStack(Items.COBBLESTONE, 64));
         contents.set(4, createAxe(enchantmentRegistry));
         contents.set(5, createShovel(enchantmentRegistry));
-        contents.set(6, new ItemStack(Items.LAVA_BUCKET));
         contents.set(7, new ItemStack(Items.WATER_BUCKET));
         contents.set(8, new ItemStack(Items.COOKED_BEEF, 64));
 
