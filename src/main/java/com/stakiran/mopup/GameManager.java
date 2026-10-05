@@ -60,6 +60,10 @@ public class GameManager {
     private static final int CEILING_MARGIN = 3;
     private static int ceilingY;
 
+    // Score: 50 at the base time (scale / 10 minutes), approaching 100 when faster and 0 when slower.
+    // score = 100 / (1 + r^2), r = clear time / base time
+    private static final double BASE_SECONDS_PER_SCALE = 60.0 / 10;
+
     private static final int BORDER_SIZE = 100;
     private static final long MIDNIGHT = 18000;
 
@@ -134,14 +138,28 @@ public class GameManager {
         HudManager.hide();
 
         int seconds = gameTicks / TICKS_PER_SECOND;
-        String time = String.format("%d:%02d", seconds / 60, seconds % 60);
+        String time = formatTime(seconds);
+        int baseSeconds = (int) Math.round(scale * BASE_SECONDS_PER_SCALE);
+        int score = score((double) gameTicks / TICKS_PER_SECOND, baseSeconds);
 
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.changeGameMode(GameMode.SPECTATOR);
         }
-        HudManager.showTitle(server, "§6§l掃討完了！", "§fクリアタイム " + time + " §7(規模 " + scale + ")");
+        HudManager.showTitle(server, "§6§l掃討完了！ スコア " + score,
+            "§fクリアタイム " + time + " §7(基準 " + formatTime(baseSeconds) + "、規模 " + scale + ")");
         server.getPlayerManager().broadcast(
-            Text.literal("§6§l[Mopup] 掃討完了！ クリアタイム: " + time + " （規模: " + scale + "）"), false);
+            Text.literal("§6§l[Mopup] 掃討完了！ スコア: " + score + " （クリアタイム: " + time
+                + "、基準: " + formatTime(baseSeconds) + "、規模: " + scale + "）"), false);
+    }
+
+    private static int score(double clearSeconds, int baseSeconds) {
+        if (baseSeconds <= 0) return 0;
+        double r = clearSeconds / baseSeconds;
+        return (int) Math.round(100 / (1 + r * r));
+    }
+
+    private static String formatTime(int seconds) {
+        return String.format("%d:%02d", seconds / 60, seconds % 60);
     }
 
     // ========== GAME OVER ==========
@@ -150,8 +168,7 @@ public class GameManager {
         currentPhase = Phase.LOST;
         HudManager.hide();
 
-        int seconds = gameTicks / TICKS_PER_SECOND;
-        String time = String.format("%d:%02d", seconds / 60, seconds % 60);
+        String time = formatTime(gameTicks / TICKS_PER_SECOND);
 
         // Dead player also respawns in spectator
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
