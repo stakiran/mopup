@@ -1,6 +1,7 @@
-# mopup
-
+# 掃討マイクラ
 100ブロックのワールドで、地上（y>=64）の敵モブを掃討するミニゲームMOD（Fabric 1.21.11）
+
+[![mopup demoplay](https://img.youtube.com/vi/RwwMX-0IuCU/maxresdefault.jpg)](https://www.youtube.com/watch?v=RwwMX-0IuCU)
 
 ## 導入方法
 
