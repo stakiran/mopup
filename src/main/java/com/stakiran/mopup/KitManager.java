@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// lightgame100 のキットのエリトラとロケット花火を松明に置き換えたもの
+// lightgame100 のキットからエリトラとロケット花火を除き、松明を加えて種類ごとに並べ直したもの
 public class KitManager {
 
     public static void giveKit(ServerPlayerEntity player) {
@@ -25,30 +25,28 @@ public class KitManager {
 
         List<ItemStack> contents = new ArrayList<>(Collections.nCopies(27, ItemStack.EMPTY));
 
-        // Row 1: ネザライトの剣, 松明, ネザライトのツルハシ, 丸石, ネザライトの斧, ネザライトのショベル, (空き), 水バケツ, 牛肉
+        // 左4列に装備・消耗品、右3列に松明をまとめる（特定のホットバー配置を前提にしない並び）
+        // Row 1: ネザライトの剣, ネザライトのツルハシ, ネザライトの斧, ネザライトのショベル, (空き), (空き), 松明 x3
         contents.set(0, new ItemStack(Items.NETHERITE_SWORD));
-        contents.set(1, new ItemStack(Items.TORCH, 64));
-        contents.set(2, createPickaxe(enchantmentRegistry));
-        contents.set(3, new ItemStack(Items.COBBLESTONE, 64));
-        contents.set(4, createAxe(enchantmentRegistry));
-        contents.set(5, createShovel(enchantmentRegistry));
-        contents.set(7, new ItemStack(Items.WATER_BUCKET));
-        contents.set(8, new ItemStack(Items.COOKED_BEEF, 64));
+        contents.set(1, createPickaxe(enchantmentRegistry));
+        contents.set(2, createAxe(enchantmentRegistry));
+        contents.set(3, createShovel(enchantmentRegistry));
 
-        // Row 2: 盾, 鉄レギンス, 鉄ブーツ, 鉄ヘルメット, 鉄チェストプレート, 盾, 松明, 松明, 松明
-        contents.set(9, new ItemStack(Items.SHIELD));
-        contents.set(10, new ItemStack(Items.IRON_LEGGINGS));
-        contents.set(11, new ItemStack(Items.IRON_BOOTS));
-        contents.set(12, new ItemStack(Items.IRON_HELMET));
-        contents.set(13, new ItemStack(Items.IRON_CHESTPLATE));
-        contents.set(14, new ItemStack(Items.SHIELD));
-        contents.set(15, new ItemStack(Items.TORCH, 64));
-        contents.set(16, new ItemStack(Items.TORCH, 64));
-        contents.set(17, new ItemStack(Items.TORCH, 64));
+        // Row 2: 鉄ヘルメット, 鉄チェストプレート, 鉄レギンス, 鉄ブーツ, (空き), (空き), 松明 x3
+        contents.set(9, new ItemStack(Items.IRON_HELMET));
+        contents.set(10, new ItemStack(Items.IRON_CHESTPLATE));
+        contents.set(11, new ItemStack(Items.IRON_LEGGINGS));
+        contents.set(12, new ItemStack(Items.IRON_BOOTS));
 
-        // Row 3: 松明 x5スタック
-        for (int i = 18; i <= 22; i++) {
-            contents.set(i, new ItemStack(Items.TORCH, 64));
+        // Row 3: 丸石, 盾, 水バケツ, 牛肉, (空き), (空き), 盾, 松明 x2
+        contents.set(18, new ItemStack(Items.COBBLESTONE, 64));
+        contents.set(19, new ItemStack(Items.SHIELD));
+        contents.set(20, new ItemStack(Items.WATER_BUCKET));
+        contents.set(21, new ItemStack(Items.COOKED_BEEF, 64));
+        contents.set(24, new ItemStack(Items.SHIELD));
+
+        for (int slot : new int[] {6, 7, 8, 15, 16, 17, 25, 26}) {
+            contents.set(slot, new ItemStack(Items.TORCH, 64));
         }
 
         ItemStack shulkerBox = new ItemStack(Items.SHULKER_BOX);
