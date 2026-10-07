@@ -63,9 +63,13 @@ public class GameManager {
     private static final int CEILING_MARGIN = 3;
     private static int ceilingY;
 
-    // Score: 50 at the base time (scale / 10 minutes), approaching 100 when faster and 0 when slower.
+    // Score: 50 at the base time (scale / 10 minutes, at least MIN_BASE_SECONDS),
+    // approaching 100 when faster and 0 when slower.
     // score = 100 / (1 + r^2), r = clear time / base time
     private static final double BASE_SECONDS_PER_SCALE = 60.0 / 10;
+    // Small worlds (scale <= 30) share a fixed base time: winning takes at least
+    // the clear countdown anyway, so a base time proportional to scale alone is meaningless there
+    private static final int MIN_BASE_SECONDS = 3 * 60;
 
     private static final int BORDER_SIZE = 100;
     private static final long MIDNIGHT = 18000;
@@ -143,7 +147,7 @@ public class GameManager {
 
         int seconds = gameTicks / TICKS_PER_SECOND;
         String time = formatTime(seconds);
-        int baseSeconds = (int) Math.round(scale * BASE_SECONDS_PER_SCALE);
+        int baseSeconds = Math.max(MIN_BASE_SECONDS, (int) Math.round(scale * BASE_SECONDS_PER_SCALE));
         int score = score((double) gameTicks / TICKS_PER_SECOND, baseSeconds);
 
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
