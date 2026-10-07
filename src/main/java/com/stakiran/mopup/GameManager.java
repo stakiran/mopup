@@ -94,9 +94,10 @@ public class GameManager {
             world.setTimeOfDay(MIDNIGHT);
         }
 
-        // Reset player state so that a retry starts fair (inventory is reset by /mopup item)
+        // Reset player state (including inventory) so that a retry starts fair
         for (ServerPlayerEntity p : server.getPlayerManager().getPlayerList()) {
             p.changeGameMode(GameMode.SURVIVAL);
+            KitManager.giveKit(p);
             p.setHealth(p.getMaxHealth());
             p.getHungerManager().setFoodLevel(20);
             p.getHungerManager().setSaturationLevel(5.0f);
