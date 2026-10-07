@@ -11,7 +11,10 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.border.WorldBorder;
@@ -150,6 +153,7 @@ public class GameManager {
         server.getPlayerManager().broadcast(
             Text.literal("§6§l[Mopup] 掃討完了！ スコア: " + score + " （クリアタイム: " + time
                 + "、基準: " + formatTime(baseSeconds) + "、規模: " + scale + "）"), false);
+        broadcastSeed(server);
     }
 
     private static int score(double clearSeconds, int baseSeconds) {
@@ -177,6 +181,20 @@ public class GameManager {
         HudManager.showTitle(server, "§c§lゲームオーバー", "§f経過時間 " + time + " §7(規模 " + scale + ")");
         server.getPlayerManager().broadcast(
             Text.literal("§c§l[Mopup] " + reason + " ゲームオーバー（経過時間: " + time + "、規模: " + scale + "）"), false);
+        broadcastSeed(server);
+    }
+
+    // Shown on clear / game over so that a screenshot of the chat identifies the world
+    private static void broadcastSeed(MinecraftServer server) {
+        if (gameWorld == null) return;
+        String seed = Long.toString(gameWorld.getSeed());
+        // Same click-to-copy behavior as vanilla /seed
+        Text seedText = Text.literal(seed).styled(style -> style
+            .withColor(Formatting.GREEN)
+            .withClickEvent(new ClickEvent.CopyToClipboard(seed))
+            .withHoverEvent(new HoverEvent.ShowText(Text.translatable("chat.copy.click"))));
+        server.getPlayerManager().broadcast(
+            Text.literal("§7[Mopup] seed: ").append(seedText), false);
     }
 
     // ========== TICK EVENT ==========
